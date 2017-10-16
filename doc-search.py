@@ -9,6 +9,7 @@ import pyexcel as pe
 
 EMAIL_REGEX = re.compile(r"(?i)([a-z0-9._-]{1,}@[a-z0-9-]{1,}\.[a-z]{2,})")
 FLAT_FORMATS = ['txt', 'out', 'log', 'csv', 'ini']
+BAD_FILES = ['exe', 'py', 'pyc', 'pyd', 'dll', 'js' 'css', 'ico']
 
 
 def main():
@@ -24,6 +25,10 @@ def main():
 	for doc in directories:
 		try:
 			extension = (doc.split('.')[-1]).lower()
+
+			# Skip bad files
+			if extension in BAD_FILES:
+				continue
 
 			# Process xlsm documents
 			if extension == 'xlsm':
