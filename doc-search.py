@@ -4,6 +4,7 @@ import glob
 import re
 import os
 import textract
+import pyexcel as pe
 
 
 EMAIL_REGEX = re.compile(r"(?i)([a-z0-9._-]{1,}@[a-z0-9-]{1,}\.[a-z]{2,})")
@@ -21,7 +22,15 @@ def main():
 	directories = get_files(args.directory)
 	for doc in directories:
 		try:
-			emails = search_docs(doc)
+			extension = (doc.split('.')[-1]).lower()
+
+			# Process xlsm documents
+			if extension == 'xlsm':
+				emails = search_xlsm(doc)
+
+			# Process all other documents
+			else:
+				emails = search_docs(doc)
 
 			# Unique emails
 			if len(emails) > 0:
@@ -53,6 +62,19 @@ def get_files(directory):
 			directories.append(os.path.join(root, filename))
 
 	return directories
+
+
+def search_xlsm(doc):
+	emails = []
+
+	doc_name = doc.split('/')[-1]
+	new_doc = "{0}.xls".format(doc_name.split('.')[0])
+	sheet = pe.get_book(file_name=doc)
+	sheet.save_as("/tmp/{0}".format(new_doc))
+
+	emails = search_docs("/tmp/{0}".format(new_doc))
+
+	return emails
 
 
 def search_docs(doc):
