@@ -8,6 +8,7 @@ import pyexcel as pe
 
 
 EMAIL_REGEX = re.compile(r"(?i)([a-z0-9._-]{1,}@[a-z0-9-]{1,}\.[a-z]{2,})")
+FLAT_FORMATS = ['txt', 'out', 'log', 'csv', 'ini']
 
 
 def main():
@@ -27,6 +28,10 @@ def main():
 			# Process xlsm documents
 			if extension == 'xlsm':
 				emails = search_xlsm(doc)
+
+			# Process text documents
+			elif extension in FLAT_FORMATS:
+				emails = search_text(doc)
 
 			# Process all other documents
 			else:
@@ -62,6 +67,18 @@ def get_files(directory):
 			directories.append(os.path.join(root, filename))
 
 	return directories
+
+
+def search_text(doc):
+	emails = []
+
+	text = open(doc, 'rb')
+	for line in text:
+		email = EMAIL_REGEX.search(line)
+		if email:
+			emails.append(email.group(0))
+
+	return emails
 
 
 def search_xlsm(doc):
